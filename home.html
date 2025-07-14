@@ -9,13 +9,15 @@
     href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <style>
     body {
-      background-color: #f8f9fa;
+      /* Added a soft dark orange background color */
+      background-color: #FAD7A0;
       font-family: 'Inter', sans-serif;
     }
     .card {
       margin-top: 50px;
       border: none;
       border-radius: 15px;
+      overflow: hidden; /* Ensures the image corners are rounded with the card */
     }
     .card-title {
         font-weight: 600;
@@ -64,10 +66,16 @@
   <div class="row justify-content-center">
     <div class="col-md-6">
       <div class="card shadow-sm">
+        
+        <!-- Added Header Image -->
+        <img 
+          src="./weog logo.png" 
+          class="card-img-top" 
+          alt="WEOG Header Image">
         <div class="card-body p-4">
           <h4 class="card-title text-center mb-4">WEOG Payment Confirmation</h4>
           
-          
+          <!-- The form action is set to a placeholder. Remember to insert your actual script URL. -->
           <form id="paymentForm" target="_blank" action="https://script.google.com/macros/s/AKfycbxq_DScPNFI2qdRW1UdO-W0earFM5QRb4PvRdvCO7-IeNj6xDOcpOwyFZeba9t2wvutcQ/exec" method="POST">
             
             <!-- Full Name Input -->
