@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>WEOG Payment Confirmation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link 
+    rel="stylesheet" 
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Inter', sans-serif;
+    }
+    .card {
+      margin-top: 50px;
+      border: none;
+      border-radius: 15px;
+    }
+    .card-title {
+        font-weight: 600;
+    }
+    .validation-message {
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+    }
+    .valid {
+      color: #198754; /* Bootstrap success green */
+    }
+    .invalid {
+      color: #dc3545; /* Bootstrap danger red */
+    }
+    .spinner-border-sm {
+      width: 1rem;
+      height: 1rem;
+    }
+    .form-control, .form-select {
+        border-radius: 8px;
+    }
+    .btn-success {
+        border-radius: 8px;
+        padding: 10px;
+    }
+    #form-error-message {
+        display: none;
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #dc3545;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        z-index: 1000;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow-sm">
+        <div class="card-body p-4">
+          <h4 class="card-title text-center mb-4">WEOG Payment Confirmation</h4>
+          
+          
+          <form id="paymentForm" target="_blank" action="https://script.google.com/macros/s/AKfycbxq_DScPNFI2qdRW1UdO-W0earFM5QRb4PvRdvCO7-IeNj6xDOcpOwyFZeba9t2wvutcQ/exec" method="POST">
+            
+            <!-- Full Name Input -->
+            <div class="mb-3">
+              <label for="fullName" class="form-label">Account Name / Full Name</label>
+              <input type="text" class="form-control" id="fullName" name="Full Name" required>
+            </div>
+
+            <!-- Membership ID Input -->
+            <div class="mb-3">
+              <label for="memberId" class="form-label">Membership ID</label>
+              <input type="text" class="form-control" id="memberId" name="Membership ID" required onblur="validateMembershipId()">
+              <div id="membershipValidation" class="validation-message"></div>
+            </div>
+            
+            <!-- Email Input -->
+            <div class="mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input type="email" class="form-control" id="email" name="Email" required>
+            </div>
+            
+            <!-- Amount Input -->
+            <div class="mb-3">
+              <label for="amount" class="form-label">Amount</label>
+              <input type="text" class="form-control" id="amount" name="Amount Paid" required>
+            </div>
+            
+            <!-- Bank Name Input -->
+            <div class="mb-3">
+              <label for="bankName" class="form-label">Bank Name</label>
+              <input type="text" class="form-control" id="bankName" name="Bank Name" required>
+            </div>
+
+            <!-- Payment Type Select -->
+            <div class="mb-3">
+              <label for="paymentType" class="form-label">Payment Type</label>
+              <select class="form-select" id="paymentType" name="Payment Type" onchange="showPaymentDetails()" required>
+                <option value="" disabled selected>Choose payment type</option>
+                <option value="Membership Payment">Membership Payment</option>
+                <option value="Event Payment">Event Payment</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <!-- Dynamic Payment Info -->
+            <div id="paymentDetails" class="alert alert-info" style="display:none;"></div>
+
+            <!-- Submit Button -->
+            <div class="d-grid mt-4">
+              <button type="submit" id="submitBtn" class="btn btn-success" disabled>Payment Made</button>
+            </div>
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Error message container -->
+<div id="form-error-message"></div>
+
+<script>
+  let membershipValidated = false;
+  // IMPORTANT: Replace with your actual Google Apps Script URL for validation
+  const validationScriptUrl = 'https://script.google.com/macros/s/AKfycbyUtrlshYpTi2zWdh9kILhNPRzlP3Cctlb03PV97iVQ3foUUF7rWW_XAqamPy-qaJbyOg/exec';
+
+  const memberIdInput = document.getElementById('memberId');
+  const validationDiv = document.getElementById('membershipValidation');
+  const submitBtn = document.getElementById('submitBtn');
+  const paymentForm = document.getElementById('paymentForm');
+  const paymentTypeSelect = document.getElementById('paymentType');
+  const paymentDetailsDiv = document.getElementById('paymentDetails');
+  const errorMessageDiv = document.getElementById('form-error-message');
+
+  function validateMembershipId() {
+    const membershipId = memberIdInput.value.trim();
+    
+    if (!membershipId) {
+      validationDiv.innerHTML = '';
+      membershipValidated = false;
+      checkFormValidity();
+      return;
+    }
+    
+    // Show loading spinner
+    validationDiv.innerHTML = '<div class="d-flex align-items-center"><span class="spinner-border spinner-border-sm me-2" role="status"></span><span>Validating...</span></div>';
+    
+    // Make fetch request to validate membership ID
+    fetch(`${validationScriptUrl}?action=validate&membershipId=${encodeURIComponent(membershipId)}`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.valid) {
+          validationDiv.innerHTML = '<span class="valid">✓ Valid Membership ID</span>';
+          membershipValidated = true;
+        } else {
+          validationDiv.innerHTML = `<span class="invalid">✗ ${data.error || 'Invalid Membership ID'}</span>`;
+          membershipValidated = false;
+        }
+        checkFormValidity();
+      })
+      .catch(error => {
+        console.error('Validation error:', error);
+        validationDiv.innerHTML = '<span class="invalid">✗ Error validating ID</span>';
+        membershipValidated = false;
+        checkFormValidity();
+      });
+  }
+  
+  function checkFormValidity() {
+    // Enable submit button only if membership is validated and the rest of the form is valid
+    if (membershipValidated && paymentForm.checkValidity()) {
+      submitBtn.disabled = false;
+    } else {
+      submitBtn.disabled = true;
+    }
+  }
+  
+  // Add event listeners to check form validity on user interaction
+  paymentForm.addEventListener('input', checkFormValidity);
+  paymentForm.addEventListener('change', checkFormValidity);
+
+  function showPaymentDetails() {
+    const type = paymentTypeSelect.value;
+    let message = "";
+
+    switch (type) {
+      case "Membership Payment":
+        message = `<strong>Pay ₦10,000 to:</strong><br>
+                   Bank: GTBank<br>
+                   Account Name: WEOG Nigeria<br>
+                   Account Number: 0123456789`;
+        break;
+      case "Event Payment":
+        message = `<strong>Pay ₦5,000 to:</strong><br>
+                   Bank: GTBank<br>
+                   Account Name: WEOG Events<br>
+                   Account Number: 1234567890`;
+        break;
+      case "Other":
+        message = `Please transfer the appropriate amount to:<br>
+                   Bank: GTBank<br>
+                   Account Name: WEOG Services<br>
+                   Account Number: 2345678901`;
+        break;
+    }
+
+    paymentDetailsDiv.innerHTML = message;
+    paymentDetailsDiv.style.display = message ? "block" : "none";
+    checkFormValidity();
+  }
+  
+  // Function to show a custom error message instead of an alert
+  function showErrorMessage(message) {
+      errorMessageDiv.textContent = message;
+      errorMessageDiv.style.display = 'block';
+      // Hide the message after 3 seconds
+      setTimeout(() => {
+          errorMessageDiv.style.display = 'none';
+      }, 3000);
+  }
+
+  // Prevent form submission if membership ID is not validated
+  paymentForm.addEventListener('submit', function(e) {
+    if (!membershipValidated) {
+      e.preventDefault(); // Stop the form submission
+      showErrorMessage('Please enter and validate your Membership ID before submitting.');
+      memberIdInput.focus();
+      return false;
+    }
+  });
+</script>
+</body>
+</html>
