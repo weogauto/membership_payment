@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Submitted Successfully</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #27ae60; 
+            --background-color: #f4f7f6;
+            --card-background: #ffffff;
+            --text-color: #333333;
+            --subtle-text-color: #555555;
+            --shadow-color: rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .card {
+            background-color: var(--card-background);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px var(--shadow-color);
+            text-align: center;
+            padding: 40px 30px;
+            max-width: 450px;
+            width: 100%;
+            transform: translateY(-20px);
+            animation: floatUp 0.8s ease-out forwards;
+        }
+        
+        @keyframes floatUp {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px auto;
+        }
+
+        .success-icon .circle {
+            fill: var(--primary-color);
+            animation: scaleIn 0.5s ease-out forwards;
+            opacity: 0;
+            transform-origin: center;
+        }
+        
+        .success-icon .checkmark {
+            stroke: white;
+            stroke-dasharray: 100;
+            stroke-dashoffset: 100;
+            animation: drawCheck 0.6s 0.3s ease-out forwards;
+        }
+        
+        @keyframes scaleIn {
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes drawCheck {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+
+
+        h1 {
+            font-weight: 600;
+            font-size: 28px;
+            margin: 0 0 10px 0;
+        }
+
+        p {
+            color: var(--subtle-text-color);
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .home-button {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 16px;
+            padding: 12px 30px;
+            border-radius: 50px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .home-button:hover {
+            background-color: #219d55; 
+            transform: translateY(-2px);
+        }
+        
+        .footer-logo {
+            margin-top: 30px;
+            opacity: 0.7;
+            max-width: 100px;
+        }
+        
+        
+        @media (max-width: 480px) {
+            .card {
+                padding: 30px 20px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+            p {
+                font-size: 15px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <svg class="success-icon" viewBox="0 0 52 52">
+            <circle class="circle" cx="26" cy="26" r="25" fill="none"/>
+            <path class="checkmark" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+        </svg>
+
+        <h1>Submission Successful!</h1>
+        <p>
+            Thank you for your payment. We have received your confirmation and will process it shortly. A receipt will be sent to your email.
+        </p>
+        
+        <a href="https://your-website.com" class="home-button">
+            Back to Homepage
+        </a>
+        
+        <img src="https://via.placeholder.com/100x40.png?text=Your+Logo" alt="WEOG Logo" class="footer-logo">
+
+    </div>
+
+</body>
+</html>
