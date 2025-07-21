@@ -1,44 +1,40 @@
 // File: netlify/functions/submit-form.js
-exports.handler = async function (event, context) {
-    const { default: fetch } = await import('node-fetch');
-    if (event.httpMethod !== 'POST') {
-        return { statusCode: 405, body: 'Method Not Allowed' };
-    }
+// USE THIS CODE IF YOUR package.json has "node-fetch": "^3.3.2"
 
-    const SCRIPT_URL = process.env.APPS_SCRIPT_URL;
+const { URLSearchParams } = require('url');
 
-  // --- ADD THESE LINES FOR DEBUGGING ---
-    console.log("Attempting to access environment variable APPS_SCRIPT_URL...");
-    if (SCRIPT_URL) {
-        console.log("Successfully retrieved URL:", SCRIPT_URL.substring(0, 45) + "..."); // Log first 45 chars for security
-    } else {
-        console.error("CRITICAL: APPS_SCRIPT_URL environment variable is NOT SET!");
-    }
-    // --- END OF DEBUGGING LINES ---
+exports.handler = async function (event) {
+  const { default: fetch } = await import('node-fetch');
 
-    // Add a guard clause to stop execution if the URL is missing
-    if (!SCRIPT_URL) {
-        return { 
-        statusCode: 500, 
-        body: JSON.stringify({ result: 'error', error: 'Server configuration error. Please contact admin.' }) 
-        };
-    }
+  if (event.httpMethod !== 'POST') {
+    return { statusCode: 405, body: 'Method Not Allowed' };
+  }
 
-    try {
-        const response = await fetch(SCRIPT_URL, {
-        method: 'POST',
-        body: event.body
-        });
-        const data = await response.json();
-        return {
-        statusCode: 200,
-        body: JSON.stringify(data)
-        };
-    } catch (error) {
-        console.error("Error during fetch to Google Script:", error);
-        return {
-        statusCode: 500,
-        body: JSON.stringify({ result: 'error', error: 'An error occurred while submitting.' })
-        };
+  const SCRIPT_URL = process.env.APPS_SCRIPT_URL;
+  if (!SCRIPT_URL) {
+    return { statusCode: 500, body: JSON.stringify({ result: 'error', error: 'Server configuration error.' }) };
+  }
+
+  try {
+    const params = new URLSearchParams(event.body);
+    const response = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params.toString(),
+    });
+
+    if (!response.ok) {
+        throw new Error(`Google Script responded with status: ${response.status}`);
     }
+    
+    const data = await response.json();
+    return { statusCode: 200, body: JSON.stringify(data) };
+
+  } catch (error) {
+    console.error("RUNTIME ERROR:", error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ result: 'error', error: 'An unexpected error occurred during submission.' }),
+    };
+  }
 };
