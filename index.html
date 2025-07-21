@@ -164,7 +164,7 @@
     validationDiv.innerHTML = '<div class="d-flex align-items-center"><span class="spinner-border spinner-border-sm me-2" role="status"></span><span>Validating...</span></div>';
     
     // The validation part remains the same (using fetch with GET)
-    fetch(`${scriptUrl}?action=validate&membershipId=${encodeURIComponent(membershipId)}`)
+    fetch(`/api/validate?membershipId=${encodeURIComponent(membershipId)}`)
       .then(response => response.json())
       .then(data => {
         if (data.valid) {
