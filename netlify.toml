@@ -1,0 +1,13 @@
+# File: netlify.toml
+
+# NEW: Rule for validation requests
+[[redirects]]
+  from = "/api/validate"
+  to = "/.netlify/functions/validate-id"
+  status = 200
+
+# EXISTING: Rule for form submissions
+[[redirects]]
+  from = "/api/submit-form"
+  to = "/.netlify/functions/submit-form"
+  status = 200
