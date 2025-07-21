@@ -76,7 +76,7 @@
           <h4 class="card-title text-center mb-4">WEOG Payment Confirmation</h4>
           
           <!-- FIXED: Added target="_top" to enable proper redirect -->
-          <form id="paymentForm" action="https://script.google.com/macros/s/AKfycbwBDG144cdk2Qkbn1NZYFg9q0v5TzRaB8QCim1QbzU7GUJpD7QfAn-7OpjAovZzfO_gFw/exec" method="POST" target="_top">
+          <form id="paymentForm" method="POST" target="_top">
             
             <!-- Full Name Input -->
             <div class="mb-3">
@@ -141,7 +141,7 @@
 <script>
   let membershipValidated = false;
   // This URL is now used for BOTH validation and submission
-  const scriptUrl = 'https://script.google.com/macros/s/AKfycbwBDG144cdk2Qkbn1NZYFg9q0v5TzRaB8QCim1QbzU7GUJpD7QfAn-7OpjAovZzfO_gFw/exec'; // IMPORTANT: Use your latest deployment URL here
+  const scriptUrl = '/.netlify/functions/submit-form'; // IMPORTANT: Use your latest deployment URL here
 
   const memberIdInput = document.getElementById('memberId');
   const validationDiv = document.getElementById('membershipValidation');
@@ -201,10 +201,10 @@
     // ... your switch case for payment details remains the same
     switch (type) {
       case "Membership Payment":
-        message = `<strong>Pay ₦10,000 to:</strong><br>Bank: GTBank<br>Account Name: WEOG Nigeria<br>Account Number: 0123456789`;
+        message = `<strong>Pay to:</strong><br>Bank: GTBank<br>Account Name: WEOG Nigeria<br>Account Number: 0123456789`;
         break;
       case "Event Payment":
-        message = `<strong>Pay ₦5,000 to:</strong><br>Bank: GTBank<br>Account Name: WEOG Events<br>Account Number: 1234567890`;
+        message = `<strong>Pay to:</strong><br>Bank: GTBank<br>Account Name: WEOG Events<br>Account Number: 1234567890`;
         break;
       case "Other":
         message = `Please transfer the appropriate amount to:<br>Bank: GTBank<br>Account Name: WEOG Services<br>Account Number: 2345678901`;
