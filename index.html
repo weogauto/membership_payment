@@ -142,7 +142,6 @@
   let membershipValidated = false;
   // This URL is now used for BOTH validation and submission
   const scriptUrl = '/api/submit-form'; // IMPORTANT: Use your latest deployment URL here
-
   const memberIdInput = document.getElementById('memberId');
   const validationDiv = document.getElementById('membershipValidation');
   const submitBtn = document.getElementById('submitBtn');
@@ -166,7 +165,7 @@
     // The validation part remains the same (using fetch with GET)
     fetch(`/api/validate?membershipId=${encodeURIComponent(membershipId)}`)
       .then(response => response.json())
-      .then(data => {
+      .then(data => { 
         if (data.valid) {
           validationDiv.innerHTML = '<span class="valid">✓ Valid Membership ID</span>';
           membershipValidated = true;
