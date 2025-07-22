@@ -159,6 +159,18 @@
       checkFormValidity();
       return;
     }
+        // --- START OF CHANGES ---
+
+    // Create a variable to hold the URL we are about to fetch
+    const urlToFetch = `/api/validate?membershipId=${encodeURIComponent(membershipId)}`;
+
+    // Log the URL to the browser's console for debugging
+    console.log("Attempting to validate with URL:", urlToFetch);
+
+    // Use the new variable in the fetch command
+    fetch(urlToFetch)
+
+    // --- END OF CHANGES ---
     
     validationDiv.innerHTML = '<div class="d-flex align-items-center"><span class="spinner-border spinner-border-sm me-2" role="status"></span><span>Validating...</span></div>';
     
