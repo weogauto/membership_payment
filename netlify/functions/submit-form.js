@@ -1,42 +1,29 @@
 // File: netlify/functions/submit-form.js
 
-const { URLSearchParams } = require('url');
-const busboy = require('busboy');
+import { URLSearchParams } from 'url';
+import busboy from 'busboy';
 
-// Helper function to parse multipart form data
+// Helper function to parse multipart form data from Netlify's event body
 function parseMultipartForm(event) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const fields = {};
+    const bb = busboy({
+      headers: {
+        'content-type': event.headers['content-type'] || event.headers['Content-Type'],
+      },
+    });
 
-    try {
-      const bb = busboy({
-        headers: {
-          'content-type': event.headers['content-type'] || event.headers['Content-Type'],
-        },
-      });
+    bb.on('field', (fieldname, val) => {
+      fields[fieldname] = val;
+    });
 
-      bb.on('field', (fieldname, val) => {
-        fields[fieldname] = val;
-      });
-
-      bb.on('close', () => {
-        resolve(fields);
-      });
-      
-      bb.on('error', err => {
-        reject(err);
-      });
-
-      // The body is base64 encoded by Netlify for multipart forms
-      bb.end(Buffer.from(event.body, 'base64'));
-    } catch (err) {
-      reject(err);
-    }
+    bb.on('file', (name, file) => file.resume());
+    bb.on('close', () => resolve(fields));
+    bb.end(Buffer.from(event.body, 'base64'));
   });
 }
 
-exports.handler = async (event) => {
-  // Use dynamic import for node-fetch v3
+export const handler = async (event) => {
   const { default: fetch } = await import('node-fetch');
 
   if (event.httpMethod !== 'POST') {
@@ -63,14 +50,14 @@ exports.handler = async (event) => {
     });
 
     if (!response.ok) {
-      throw new Error(`Google Script responded with status: ${response.status} ${response.statusText}`);
+      throw new Error(`Google Script responded with status: ${response.status}`);
     }
 
     const data = await response.json();
     return { statusCode: 200, body: JSON.stringify(data) };
 
   } catch (error) {
-    console.error("RUNTIME ERROR:", error);
+    console.error("RUNTIME ERROR in submit-form.js:", error.toString());
     return {
       statusCode: 500,
       body: JSON.stringify({ result: 'error', error: 'An unexpected server error occurred.' }),
