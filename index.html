@@ -252,7 +252,7 @@
     // --- ADD THIS FOR DEBUGGING ---
     console.log("--- Browser is sending this data: ---");
     for (let [key, value] of formData.entries()) {
-      console.log(key, value);
+      console.log(`Key: ${key}, Value: ${value}`);
     }
     // Use fetch to submit the form data in the background
     fetch(scriptUrl, {
