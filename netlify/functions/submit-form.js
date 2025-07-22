@@ -1,9 +1,42 @@
 // File: netlify/functions/submit-form.js
-// This version is for node-fetch v3
 
-const { URLSearchParams } = require('url');
+import { URLSearchParams } from 'url';
+import busboy from 'busboy';
 
-exports.handler = async function (event) {
+// Helper function to parse multipart form data from Netlify's event body
+function parseMultipartForm(event) {
+  return new Promise((resolve) => {
+    const fields = {};
+
+    // Initialize busboy with the request headers
+    const bb = busboy({
+      headers: {
+        'content-type': event.headers['content-type'] || event.headers['Content-Type'],
+      },
+    });
+
+    // Process text fields
+    bb.on('field', (fieldname, val) => {
+      console.log(`Processed field: ${fieldname} = ${val}`);
+      fields[fieldname] = val;
+    });
+
+    // Ignore file uploads
+    bb.on('file', (name, file) => {
+      file.resume();
+    });
+
+    // Signal that parsing is complete
+    bb.on('close', () => {
+      resolve(fields);
+    });
+
+    // Netlify Functions encode the body as base64 when it's multipart
+    bb.end(Buffer.from(event.body, 'base64'));
+  });
+}
+
+export const handler = async (event) => {
   // Use dynamic import for node-fetch v3
   const { default: fetch } = await import('node-fetch');
 
@@ -11,43 +44,41 @@ exports.handler = async function (event) {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
-  const SCRIPT_URL = process.env.APPS_SCRIPT_URL;
-  if (!SCRIPT_URL) {
-    console.error("FATAL: APPS_SCRIPT_URL environment variable not found.");
-    return { statusCode: 500, body: JSON.stringify({ result: 'error', error: 'Server configuration error.' }) };
-  }
-
   try {
-    // Parse the incoming form data
-    const params = new URLSearchParams(event.body);
-    console.log("Forwarding to Google Script with params:", params.toString());
+    const SCRIPT_URL = process.env.APPS_SCRIPT_URL;
+    if (!SCRIPT_URL) {
+      throw new Error("Server configuration error: Script URL not found.");
+    }
 
-    // Forward the data to the Google Apps Script
+    // Use the new parser to correctly get all form fields
+    const fields = await parseMultipartForm(event);
+
+    // Reconstruct the body in a format Google Apps Script understands
+    const params = new URLSearchParams();
+    for (const key in fields) {
+      params.append(key, fields[key]);
+    }
+
+    console.log("Forwarding to Google with params:", params.toString());
+
     const response = await fetch(SCRIPT_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: params.toString(),
     });
-    
-    if (!response.ok) {
-        throw new Error(`Google Script responded with status: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    console.log("Response from Google Script:", JSON.stringify(data));
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify(data),
-    };
+    if (!response.ok) {
+      throw new Error(`Google Script responded with status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return { statusCode: 200, body: JSON.stringify(data) };
 
   } catch (error) {
-    console.error("RUNTIME ERROR in submit-form:", error);
+    console.error("RUNTIME ERROR:", error.toString());
     return {
       statusCode: 500,
-      body: JSON.stringify({ result: 'error', error: 'An unexpected error occurred during submission.' }),
+      body: JSON.stringify({ result: 'error', error: 'An unexpected server error occurred.' }),
     };
   }
 };
