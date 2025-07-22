@@ -7,14 +7,14 @@ exports.handler = async function (event) {
     // 1. Check for the secret URL
     const SCRIPT_URL = process.env.APPS_SCRIPT_URL;
     if (!SCRIPT_URL) {
-        console.error("FATAL: APPS_SCRIPT_URL environment variable not found.");
+        // console.error("FATAL: APPS_SCRIPT_URL environment variable not found.");
         return { statusCode: 500, body: JSON.stringify({ valid: false, error: 'Server configuration error.' }) };
     }
 
     // 2. Check for the Membership ID from the browser
     const membershipId = event.queryStringParameters.membershipId;
     if (!membershipId) {
-        console.error("ERROR: membershipId not found in query string.");
+        // console.error("ERROR: membershipId not found in query string.");
         return { statusCode: 400, body: JSON.stringify({ valid: false, error: 'Membership ID is required.' }) };
     }
 
@@ -25,7 +25,7 @@ exports.handler = async function (event) {
         const response = await fetch(validationUrl);
         const data = await response.json();
 
-        console.log("Response from Google Script:", JSON.stringify(data));
+        // console.log("Response from Google Script:", JSON.stringify(data));
         
         return {
         statusCode: 200,

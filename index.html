@@ -165,7 +165,7 @@
     const urlToFetch = `/api/validate?membershipId=${encodeURIComponent(membershipId)}`;
 
     // Log the URL to the browser's console for debugging
-    console.log("Attempting to validate with URL:", urlToFetch);
+    // console.log("Attempting to validate with URL:", urlToFetch);
 
     // Use the new variable in the fetch command
     fetch(urlToFetch)
@@ -247,13 +247,13 @@
     // Show a loading state on the button
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Submitting...';
-    const formData = new FormData(paymentForm);
+    // const formData = new FormData(paymentForm);
 
-    // --- ADD THIS FOR DEBUGGING ---
-    console.log("--- Browser is sending this data: ---");
-    for (let [key, value] of formData.entries()) {
-      console.log(`Key: ${key}, Value: ${value}`);
-    }
+    // --- FOR DEBUGGING ---
+    // console.log("--- Browser is sending this data: ---");
+    // for (let [key, value] of formData.entries()) {
+    //   console.log(`Key: ${key}, Value: ${value}`);
+    // }
     // Use fetch to submit the form data in the background
     fetch(scriptUrl, {
       method: 'POST',
