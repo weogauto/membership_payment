@@ -1,29 +1,37 @@
 // File: netlify/functions/submit-form.js
 
-import { URLSearchParams } from 'url';
-import busboy from 'busboy';
+const { URLSearchParams } = require('url');
+const busboy = require('busboy');
 
-// Helper function to parse multipart form data from Netlify's event body
+// Helper function to parse multipart form data
 function parseMultipartForm(event) {
-  return new Promise((resolve) => {
-    const fields = {};
-    const bb = busboy({
-      headers: {
-        'content-type': event.headers['content-type'] || event.headers['Content-Type'],
-      },
-    });
+  return new Promise((resolve, reject) => {
+    try {
+      const fields = {};
+      const bb = busboy({
+        headers: {
+          'content-type': event.headers['content-type'] || event.headers['Content-Type'],
+        },
+      });
 
-    bb.on('field', (fieldname, val) => {
-      fields[fieldname] = val;
-    });
+      bb.on('field', (fieldname, val) => {
+        fields[fieldname] = val;
+      });
 
-    bb.on('file', (name, file) => file.resume());
-    bb.on('close', () => resolve(fields));
-    bb.end(Buffer.from(event.body, 'base64'));
+      bb.on('file', (name, file) => file.resume());
+      bb.on('close', () => resolve(fields));
+      bb.on('error', err => reject(err));
+
+      // The body is base64 encoded by Netlify for multipart forms
+      bb.end(Buffer.from(event.body, 'base64'));
+    } catch (err) {
+      reject(err);
+    }
   });
 }
 
-export const handler = async (event) => {
+exports.handler = async (event) => {
+  // Use dynamic import ONLY for node-fetch v3
   const { default: fetch } = await import('node-fetch');
 
   if (event.httpMethod !== 'POST') {
@@ -50,14 +58,15 @@ export const handler = async (event) => {
     });
 
     if (!response.ok) {
-      throw new Error(`Google Script responded with status: ${response.status}`);
+      const errorText = await response.text();
+      throw new Error(`Google Script responded with status: ${response.status}. Response: ${errorText}`);
     }
 
     const data = await response.json();
     return { statusCode: 200, body: JSON.stringify(data) };
 
   } catch (error) {
-    console.error("RUNTIME ERROR in submit-form.js:", error.toString());
+    console.error("RUNTIME ERROR:", error);
     return {
       statusCode: 500,
       body: JSON.stringify({ result: 'error', error: 'An unexpected server error occurred.' }),
